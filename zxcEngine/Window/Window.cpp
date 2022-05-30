@@ -1,4 +1,5 @@
 #include "Window.hpp"
+#include <stdexcept>
 
 namespace zxc {
 	Window::Window(int width, int height, std::string title)
@@ -19,13 +20,19 @@ namespace zxc {
 	void Window::Initialize()
 	{
 		glfwInit();
-		glfwInitHint(GLFW_CLIENT_API, GLFW_NO_API);
-		glfwInitHint(GLFW_RESIZABLE, GLFW_FALSE);
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
 		window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
 	}
 	
 	bool Window::ShouldClose() {
 		return glfwWindowShouldClose(window);
+	}
+
+	void Window::CreateWindowSurface(VkInstance vkInstance, VkSurfaceKHR* surface) {
+		if (glfwCreateWindowSurface(vkInstance, window, nullptr, surface) != VK_SUCCESS) {
+			throw runtime_error("Failed to create window surface");
+		}
 	}
 }
