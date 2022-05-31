@@ -23,6 +23,8 @@
     <ClInclude Include="Device\Device.hpp" />
     <ClInclude Include="Pipeline\Pipeline.hpp" />
     <ClInclude Include="SwapChain\SwapChain.hpp" />
+    <ClInclude Include="Buffers\VertexBuffer\VertexBuffer.hpp" />
+    <ClInclude Include="Models\Vertex\Vertex.hpp" />
     <ClInclude Include="Window\Window.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -31,6 +33,8 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Pipeline\Pipeline.cpp" />
     <ClCompile Include="SwapChain\SwapChain.cpp" />
+    <ClCompile Include="Buffers\VertexBuffer\VertexBuffer.cpp" />
+    <ClCompile Include="Models\Vertex\Vertex.cpp" />
     <ClCompile Include="Window\Window.cpp" />
   </ItemGroup>
   <ItemGroup>

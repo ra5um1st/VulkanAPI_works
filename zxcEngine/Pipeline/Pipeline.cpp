@@ -1,7 +1,10 @@
 #include "Pipeline.hpp"
 
+#include "../Models/Vertex/Vertex.hpp"
+
 #include <fstream>
 #include <cassert>
+
 using namespace std;
 
 namespace zxc {
@@ -117,11 +120,14 @@ namespace zxc {
 
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 
+		auto vertexAttributeDescriptions = Vertex::GetInputAttributeDescriptions();
+		auto vertexBindingDescriptions = Vertex::GetInputBindingDescriptions();
+
 		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-		vertexInputInfo.pVertexAttributeDescriptions = nullptr;
-		vertexInputInfo.pVertexBindingDescriptions = nullptr;
-		vertexInputInfo.vertexAttributeDescriptionCount = 0;
-		vertexInputInfo.vertexBindingDescriptionCount = 0;
+		vertexInputInfo.pVertexAttributeDescriptions = vertexAttributeDescriptions.data();
+		vertexInputInfo.pVertexBindingDescriptions = vertexBindingDescriptions.data();
+		vertexInputInfo.vertexAttributeDescriptionCount = vertexAttributeDescriptions.size();
+		vertexInputInfo.vertexBindingDescriptionCount = vertexBindingDescriptions.size();
 		vertexInputInfo.pNext = nullptr;
 		vertexInputInfo.flags = 0;
 

@@ -2,14 +2,17 @@
 
 #include <stdexcept>
 #include <array>
+#include <vector>
 
 namespace zxc {
 
 	Application::Application() {
+		CreateVertexBuffer();
 		CreatePipelineLayout();
 		CreatePipeline();
 		CreateCommandBuffers();
 	};
+
 	Application::~Application() {
 		vkDestroyPipelineLayout(device.GetDevice(), pipelineLayout, nullptr);
 	};
@@ -31,7 +34,19 @@ namespace zxc {
 		pipelineConfig.renderPass = swapChain.GetRenderPass();
 		pipelineConfig.pipelineLayout = pipelineLayout;
 		pipeline = make_unique<Pipeline>("Shaders/TestShader/test_shader.vert.spv", "Shaders/TestShader/test_shader.frag.spv", device, pipelineConfig);
-	};
+	}
+
+	void Application::CreateVertexBuffer()
+	{
+		vector<Vertex> vertices = {
+			{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+			{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+			{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+		};
+
+		vertexBuffer = make_unique<VertexBuffer>(device, vertices);
+	}
+
 	void Application::CreatePipelineLayout() {
 
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
@@ -85,7 +100,8 @@ namespace zxc {
 			vkCmdBeginRenderPass(commandBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 			pipeline->Bind(commandBuffers[i]);
-			vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
+			vertexBuffer->Bind(commandBuffers[i]);
+			vertexBuffer->Draw(commandBuffers[i]);
 
 			vkCmdEndRenderPass(commandBuffers[i]);
 
