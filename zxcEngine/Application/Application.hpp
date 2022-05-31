@@ -3,6 +3,12 @@
 #include "../Window/Window.hpp"
 #include "../Pipeline/Pipeline.hpp"
 #include "../Device/Device.hpp"
+#include "../SwapChain/SwapChain.hpp"
+
+#include <memory>
+#include <vector>
+
+using namespace std;
 
 namespace zxc {
 
@@ -10,17 +16,28 @@ namespace zxc {
 	public:
 		int width = 800;
 		int height = 600;
-		std::string title = "zxcEngine";
+		string title = "zxcEngine";
+
+		Application();
+		~Application();
+
+		Application(const Application&) = delete;
+		Application& operator=(const Application&) = delete;
 
 		void Run();
 
 	private:
 		Window window{ width, height, title };
 		Device device{ window };
-		Pipeline pipeline{
-			"Shaders/TestShader/test_shader.vert",
-			"Shaders/TestShader/test_shader.frag",
-			device,
-			Pipeline::CreateDefaultConfigInfo(width, height) };
+		SwapChain swapChain{ device, window.GetExtent() };
+		unique_ptr<Pipeline> pipeline;
+		VkPipelineLayout pipelineLayout;
+		vector<VkCommandBuffer> commandBuffers;
+
+		void CreatePipeline();
+		void CreatePipelineLayout();
+		void CreateCommandBuffers();
+		void DrawFrame();
+
 	};
 }

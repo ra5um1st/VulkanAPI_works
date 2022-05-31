@@ -40,7 +40,7 @@ namespace zxc {
 		Device(Device&&) = delete;
 		Device& operator=(Device&&) = delete;
 
-		VkCommandPool getCommandPool() { return commandPool; }
+		VkCommandPool GetCommandPool() { return commandPool; }
 		VkDevice GetDevice() { return device; }
 		VkSurfaceKHR GetSurface() { return surface; }
 		VkQueue GetGraphicsQueue() { return graphicsQueue; }

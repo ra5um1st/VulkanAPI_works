@@ -16,6 +16,8 @@ namespace zxc {
 		bool ShouldClose();
 		void CreateWindowSurface(VkInstance vkInstance, VkSurfaceKHR* surface);
 
+		VkExtent2D GetExtent() { return { static_cast<uint32_t>(width), static_cast<uint32_t>(height) }; };
+
 	private:
 		GLFWwindow* window;
 

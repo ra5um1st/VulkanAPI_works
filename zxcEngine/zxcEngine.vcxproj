@@ -22,6 +22,7 @@
     <ClInclude Include="Application\Application.hpp" />
     <ClInclude Include="Device\Device.hpp" />
     <ClInclude Include="Pipeline\Pipeline.hpp" />
+    <ClInclude Include="SwapChain\SwapChain.hpp" />
     <ClInclude Include="Window\Window.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -29,6 +30,7 @@
     <ClCompile Include="Device\Device.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Pipeline\Pipeline.cpp" />
+    <ClCompile Include="SwapChain\SwapChain.cpp" />
     <ClCompile Include="Window\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -138,7 +140,6 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.211.0\Include;C:\Users\Alex\Documents\Visual Studio 2022\Libraries\glm;C:\Users\Alex\Documents\Visual Studio 2022\Libraries\glfw-3.3.7.bin.WIN64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -157,7 +158,6 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.211.0\Include;C:\Users\Alex\Documents\Visual Studio 2022\Libraries\glm;C:\Users\Alex\Documents\Visual Studio 2022\Libraries\glfw-3.3.7.bin.WIN64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

@@ -1,6 +1,7 @@
 #include "Pipeline.hpp"
 
 #include <fstream>
+#include <cassert>
 using namespace std;
 
 namespace zxc {
@@ -8,7 +9,7 @@ namespace zxc {
 	Pipeline::Pipeline(const string& vertFilepath, const string& fragFilepath, Device& device, const PipelineConfigInfo& configInfo) :
 		device{ device }
 	{
-		Initialize(vertFilepath, fragFilepath, configInfo);
+		CreateGraphicsPipeline(vertFilepath, fragFilepath, configInfo);
 	}
 
 	Pipeline::~Pipeline() {
@@ -35,12 +36,6 @@ namespace zxc {
 
 		configInfo.scissor.offset = { 0, 0 };
 		configInfo.scissor.extent = { width, height };
-
-		configInfo.viewportInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-		configInfo.viewportInfo.viewportCount = 1;
-		configInfo.viewportInfo.pViewports = &configInfo.viewport;
-		configInfo.viewportInfo.scissorCount = 1;
-		configInfo.viewportInfo.pScissors = &configInfo.scissor;
 
 		configInfo.rasterizationInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 		configInfo.rasterizationInfo.depthClampEnable = VK_FALSE;
@@ -73,16 +68,6 @@ namespace zxc {
 		configInfo.colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;  // Optional
 		configInfo.colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;              // Optional
 
-		configInfo.colorBlendInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-		configInfo.colorBlendInfo.logicOpEnable = VK_FALSE;
-		configInfo.colorBlendInfo.logicOp = VK_LOGIC_OP_COPY;  // Optional
-		configInfo.colorBlendInfo.attachmentCount = 1;
-		configInfo.colorBlendInfo.pAttachments = &configInfo.colorBlendAttachment;
-		configInfo.colorBlendInfo.blendConstants[0] = 0.0f;  // Optional
-		configInfo.colorBlendInfo.blendConstants[1] = 0.0f;  // Optional
-		configInfo.colorBlendInfo.blendConstants[2] = 0.0f;  // Optional
-		configInfo.colorBlendInfo.blendConstants[3] = 0.0f;  // Optional
-
 		configInfo.depthStencilInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
 		configInfo.depthStencilInfo.depthTestEnable = VK_TRUE;
 		configInfo.depthStencilInfo.depthWriteEnable = VK_TRUE;
@@ -97,8 +82,16 @@ namespace zxc {
 		return configInfo;
 	}
 
-	void Pipeline::Initialize(const string& vertFilepath, const string& fragFilepath, const PipelineConfigInfo& configInfo)
+	void Pipeline::Bind(VkCommandBuffer commandBuffer)
 	{
+		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+	}
+
+	void Pipeline::CreateGraphicsPipeline(const string& vertFilepath, const string& fragFilepath, const PipelineConfigInfo& configInfo)
+	{
+		assert(configInfo.pipelineLayout != VK_NULL_HANDLE && "Failed to create pipeline: no pipelineLayout");
+		assert(configInfo.renderPass != VK_NULL_HANDLE && "Failed to create pipeline: no pipelineLayout");
+
 		auto vertData = ReadFile(vertFilepath);
 		auto fragData = ReadFile(fragFilepath);
 
@@ -132,6 +125,26 @@ namespace zxc {
 		vertexInputInfo.pNext = nullptr;
 		vertexInputInfo.flags = 0;
 
+		VkPipelineViewportStateCreateInfo viewportInfo{};
+
+		viewportInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+		viewportInfo.viewportCount = 1;
+		viewportInfo.pViewports = &configInfo.viewport;
+		viewportInfo.scissorCount = 1;
+		viewportInfo.pScissors = &configInfo.scissor;
+
+		VkPipelineColorBlendStateCreateInfo colorBlendInfo{};
+
+		colorBlendInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+		colorBlendInfo.logicOpEnable = VK_FALSE;
+		colorBlendInfo.logicOp = VK_LOGIC_OP_COPY;
+		colorBlendInfo.attachmentCount = 1;
+		colorBlendInfo.pAttachments = &configInfo.colorBlendAttachment;
+		colorBlendInfo.blendConstants[0] = 0.0f;
+		colorBlendInfo.blendConstants[1] = 0.0f;
+		colorBlendInfo.blendConstants[2] = 0.0f;
+		colorBlendInfo.blendConstants[3] = 0.0f;
+
 		VkGraphicsPipelineCreateInfo pipelineInfo{};
 
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -139,10 +152,9 @@ namespace zxc {
 		pipelineInfo.pStages = shaderStages;
 		pipelineInfo.pVertexInputState = &vertexInputInfo;
 		pipelineInfo.pInputAssemblyState = &configInfo.inputAssemblyInfo;
-		pipelineInfo.pViewportState = &configInfo.viewportInfo;
+		pipelineInfo.pViewportState = &viewportInfo;
 		pipelineInfo.pRasterizationState = &configInfo.rasterizationInfo;
-		pipelineInfo.pColorBlendState = &configInfo.colorBlendInfo;
-		pipelineInfo.pMultisampleState = &configInfo.multisampleInfo;
+		pipelineInfo.pColorBlendState = &colorBlendInfo;
 		pipelineInfo.pDepthStencilState = &configInfo.depthStencilInfo;
 		pipelineInfo.pDynamicState = nullptr;
 
@@ -153,7 +165,7 @@ namespace zxc {
 		pipelineInfo.basePipelineIndex = -1;
 		pipelineInfo.basePipelineHandle = nullptr;
 
-		if (vkCreateGraphicsPipelines(device.GetDevice(), nullptr, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
+		if (vkCreateGraphicsPipelines(device.GetDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
 			throw runtime_error("Failed to create graphics pipelines");
 		}
 	}
@@ -172,13 +184,13 @@ namespace zxc {
 
 	vector<char> Pipeline::ReadFile(const string& filepath)
 	{
-		ifstream file = ifstream(filepath, ios::ate | ios::binary);
+		ifstream file{ filepath, ios::ate | ios::binary };
 
 		if (!file.is_open()) {
 			throw runtime_error("Failed to open file: " + filepath);
 		}
 
-		auto fileSize = static_cast<size_t>(file.tellg());
+		size_t fileSize = static_cast<size_t>(file.tellg());
 		vector<char> buffer = vector<char>(fileSize);
 
 		file.seekg(0);

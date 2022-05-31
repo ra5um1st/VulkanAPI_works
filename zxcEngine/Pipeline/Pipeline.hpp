@@ -12,12 +12,10 @@ namespace zxc {
 	struct PipelineConfigInfo {
 		VkViewport viewport;
 		VkRect2D scissor;
-		VkPipelineViewportStateCreateInfo viewportInfo;
 		VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
 		VkPipelineRasterizationStateCreateInfo rasterizationInfo;
 		VkPipelineMultisampleStateCreateInfo multisampleInfo;
 		VkPipelineColorBlendAttachmentState colorBlendAttachment;
-		VkPipelineColorBlendStateCreateInfo colorBlendInfo;
 		VkPipelineDepthStencilStateCreateInfo depthStencilInfo;
 		VkPipelineLayout pipelineLayout = nullptr;
 		VkRenderPass renderPass = nullptr;
@@ -35,13 +33,15 @@ namespace zxc {
 
 		static PipelineConfigInfo CreateDefaultConfigInfo(uint32_t width, uint32_t height);
 
+		void Bind(VkCommandBuffer commandBuffer);
+
 	private:
 		Device& device;
 		VkPipeline graphicsPipeline;
 		VkShaderModule vertShaderModule;
 		VkShaderModule fragShaderModule;
 
-		void Initialize(const string& vertFilepath, const string& fragFilepath, const PipelineConfigInfo& configInfo);
+		void CreateGraphicsPipeline(const string& vertFilepath, const string& fragFilepath, const PipelineConfigInfo& configInfo);
 		void CreateShaderModule(const vector<char>& data, VkShaderModule* shaderModule);
 
 		static vector<char> ReadFile(const string& filepath);
